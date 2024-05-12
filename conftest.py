@@ -1,3 +1,23 @@
+import pytest
+import random
+import string
+from helpers import Delivery
+
+@pytest.fixture
+def registered_delivery_payload():
+    while True:
+        random_suffix = ''.join(random.choices(string.ascii_lowercase, k=5))
+        login = f"{Delivery.generation_register_data_delivery_man()['login']}_{random_suffix}"
+        payload = Delivery.generation_register_data_delivery_man()
+        payload['login'] = login
+        response = Delivery.registration_delivery_man(payload)
+        if response.status_code == 201:
+            break
+    yield payload
+    Delivery.remove_delivery_man(payload)
+
+
+helpers
 import requests
 import random
 import string

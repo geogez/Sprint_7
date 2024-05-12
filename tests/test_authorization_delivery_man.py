@@ -8,73 +8,51 @@ import allure
 class TestAuthDelivery:
 
     @allure.title('Авторизация доставщика')
-    @allure.description('проверка авторизации для зарегистрированного доставщика код ответа 200')
-    def test_auth_delivery_man_success_status(self):
-        # Создание доставщика и получение данных для авторизации
-        payload = Delivery.generation_register_data_delivery_man()
+    @allure.description('Проверка авторизации для зарегистрированного доставщика, код ответа 200')
+    def test_auth_delivery_man_success_status(self, registered_delivery_payload):
+        allure.dynamic.title("Авторизация доставщика - Проверка успешного статуса")
+        allure.dynamic.description("Проверка авторизации для зарегистрированного доставщика, ожидаемый код ответа 200")
 
-        # Регистрация доставщика
-        Delivery.registration_delivery_man(payload)
-
-        # Авторизация доставщика
-        response = requests.post(Url.authorization_delivery_man, data=payload)
-
-        # Удаление доставщика
-        Delivery.remove_delivery_man(payload)
-
-        # Проверка успешной авторизации
+        response = requests.post(Url.authorization_delivery_man, data=registered_delivery_payload)
         assert response.status_code == 200
 
-    def test_auth_delivery_man_success_check_len_response(self):
-        # Создание доставщика и получение данных для авторизации
-        payload = Delivery.generation_register_data_delivery_man()
+    @allure.title('Авторизация доставщика')
+    @allure.description('Проверка успешного возврата идентификатора при успешной авторизации')
+    def test_auth_delivery_man_success_check_len_response(self, registered_delivery_payload):
+        allure.dynamic.title("Авторизация доставщика - Проверка успешного возврата идентификатора")
+        allure.dynamic.description("Проверка успешного возврата идентификатора доставщика при успешной авторизации")
 
-        # Регистрация доставщика
-        Delivery.registration_delivery_man(payload)
-
-        # Авторизация доставщика
-        response = requests.post(Url.authorization_delivery_man, data=payload)
-
-        # Удаление доставщика
-        Delivery.remove_delivery_man(payload)
-
-        # Проверка длины ответа
+        response = requests.post(Url.AUTHORIZATION_DELIVERY_MAN, data=registered_delivery_payload)
         assert len(str(response.json().get('id', ''))) > 0
 
+    @allure.title('Авторизация доставщика')
+    @allure.description('Проверка статуса 404 при попытке авторизации с несуществующей учетной записью')
     def test_auth_delivery_account_not_exist_status(self):
-        # Создание доставщика и получение данных для авторизации
+        allure.dynamic.title("Авторизация доставщика - Проверка статуса 404")
+        allure.dynamic.description("Проверка статуса 404 при попытке авторизации с несуществующей учетной записью")
+
         payload = Delivery.generation_register_data_delivery_man()
-
-        # Авторизация доставщика с неверными данными
-        response = requests.post(Url.authorization_delivery_man, data=payload)
-
-        # Проверка статуса 404, так как учетная запись не существует
+        response = requests.post(Url.AUTHORIZATION_DELIVERY_MAN, data=payload)
         assert response.status_code == 404
 
+    @allure.title('Авторизация доставщика')
+    @allure.description('Проверка сообщения об ошибке при попытке авторизации с несуществующей учетной записью')
     def test_auth_delivery_account_not_exist_message(self):
-        # Создание доставщика и получение данных для авторизации
+        allure.dynamic.title("Авторизация доставщика - Проверка сообщения об ошибке")
+        allure.dynamic.description(
+            "Проверка сообщения об ошибке при попытке авторизации с несуществующей учетной записью")
+
         payload = Delivery.generation_register_data_delivery_man()
-
-        # Авторизация доставщика с неверными данными
-        response = requests.post(Url.authorization_delivery_man, data=payload)
-
-        # Проверка сообщения об ошибке
+        response = requests.post(Url.AUTHORIZATION_DELIVERY_MAN, data=payload)
         assert response.json().get('message') == 'Учетная запись не найдена'
 
     @pytest.mark.parametrize('field', ['login', 'password'])
-    def test_auth_delivery_missing_login(self, field):
-        # Создание доставщика и получение данных для авторизации
-        payload = Delivery.generation_register_data_delivery_man()
+    def test_auth_delivery_missing_login(self, field, registered_delivery_payload):
+        allure.dynamic.title("Авторизация доставщика - Проверка отсутствия обязательного поля")
+        allure.dynamic.description(
+            "Проверка статуса 400 и сообщения об ошибке при попытке авторизации с отсутствующим обязательным полем")
 
-        # Регистрация доставщика
-        Delivery.registration_delivery_man(payload)
-
-        # Удаление одного из обязательных полей из данных для авторизации
-        invalid_payload = payload.copy()
+        invalid_payload = registered_delivery_payload.copy()
         del invalid_payload[field]
-
-        # Авторизация доставщика с неполными данными
-        response = requests.post(Url.authorization_delivery_man, data=invalid_payload)
-
-        # Проверка статуса 400 и сообщения об ошибке
+        response = requests.post(Url.AUTHORIZATION_DELIVERY_MAN, data=invalid_payload)
         assert response.status_code == 400 and response.json().get('message') == 'Недостаточно данных для входа'

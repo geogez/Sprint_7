@@ -1,4 +1,5 @@
 class Url:
-    create_delivery_man = 'https://qa-scooter.praktikum-services.ru/api/v1/courier'
-    authorization_delivery_man = 'https://qa-scooter.praktikum-services.ru/api/v1/courier/login'
-    order = 'https://qa-scooter.praktikum-services.ru/api/v1/orders'
+    BASE_URL = 'https://qa-scooter.praktikum-services.ru/api/v1'
+    CREATE_DELIVERY_MAN = f'{BASE_URL}/courier'
+    AUTHORIZATION_DELIVERY_MAN = f'{BASE_URL}/courier/login'
+    ORDER = f'{BASE_URL}/orders'
